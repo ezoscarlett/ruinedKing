@@ -3,4 +3,5 @@
 int main()
 {
     hello_main();
+    return 0;
 }
