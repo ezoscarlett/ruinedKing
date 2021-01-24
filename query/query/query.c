@@ -4,10 +4,14 @@
 struct student{
 	int num;
 	int age;
-	char *name;
+	char name[16];
 };
 
 int main(int argc, char *argv[]){
+    if(argc < 2){
+        printf("Usage: %s $num\n",argv[0]);
+        return 0;
+    }
 	FILE *fp = fopen("info.txt", "r");
 	if(fp == NULL)
 	{
@@ -18,14 +22,14 @@ int main(int argc, char *argv[]){
 	int i;
 	for (i = 0; i < 6; i++)
 	{
-		int res = fscanf(fp, "%d %d %s", stu[i].num, stu[i].age, stu[i].name);
+		int res = fscanf(fp, "%d %d %s\n", &stu[i].num, &stu[i].age, stu[i].name);
 		if(res == -1)
 		{
 			fclose(fp);
 			break;
 		}
 	}
-
+    
 	int queryNum = atoi(argv[1]);
 	if(queryNum > 5)
 	{
