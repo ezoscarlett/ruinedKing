@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 struct student{
 	int num;
@@ -8,7 +9,28 @@ struct student{
 };
 int parseline(char *line,struct student *ptr)
 {
+	char delim[] = " ";
+	char* token;
+	token = strtok(line, delim);
+	if(atoi(token) == 0)
+	{
+		printf("Invalid ID number");
+		return -1;
+	}
+	int *lineNum = atoi(token);
+	ptr->num = lineNum;
 
+	token = strtok(line, delim);
+	if(atoi(token) == 0)
+	{
+		printf("Invalid age");
+		return -1;
+	}
+	int *lineAge = atoi(token);
+	ptr->age = lineAge;
+
+	token = strtok(line, delim);
+	strcpy(ptr->name, token);
 }
 int load_file(char *filename,struct student **out,int *num)
 {
@@ -52,7 +74,7 @@ int main(int argc, char *argv[]){
         printf("stu = %d %d %s\n",stu->num,stu->age,stu->name);
         stu++;
     }
-#if 0
+/*#if 0
 	int i;
 	for (i = 0; i < 6; i++)
 	{
@@ -63,7 +85,7 @@ int main(int argc, char *argv[]){
 			break;
 		}
 	}
-#endif
+#endif*/
 	int queryNum = atoi(argv[1]);
 	if(queryNum > 5)
 	{
