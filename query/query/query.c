@@ -17,8 +17,7 @@ int parseline(char *line,struct student *ptr)
 		printf("Invalid ID number");
 		return -1;
 	}
-	int *lineNum = atoi(token);
-	ptr->num = lineNum;
+	ptr->num = atoi(token);
 
 	token = strtok(line, delim);
 	if(atoi(token) == 0)
@@ -26,11 +25,11 @@ int parseline(char *line,struct student *ptr)
 		printf("Invalid age");
 		return -1;
 	}
-	int *lineAge = atoi(token);
-	ptr->age = lineAge;
+	ptr->age = atoi(token);
 
 	token = strtok(line, delim);
-	strcpy(ptr->name, token);
+	strncpy(ptr->name, token, strlen(token));
+	return 0;
 }
 int load_file(char *filename,struct student **out,int *num)
 {

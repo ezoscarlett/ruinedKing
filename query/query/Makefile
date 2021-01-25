@@ -1,7 +1,6 @@
 CC=gcc
 CFLAGS=-Wall -Werror
-SRC=main.c \
-	query.c
+SRC=query.c
 
 OBJ_FILES := $(patsubst %.c,  %.o, $(SRC) )
 OBJS_D := $(patsubst %.c,%.d,$(SRC))
