@@ -68,19 +68,23 @@ int main(int argc, char *argv[]){
     int i = 0;
     int count = 0;
 	struct student *stu = NULL;
+    struct student *ptr = NULL;
     load_file("info.txt",&stu,&count);
-	for (i = 0; i < count; i++){
-        printf("stu = %d %d %s\n",stu->num,stu->age,stu->name);
-        stu++;
+	
+    ptr = stu;
+    for (i = 0; i < count; i++){
+        printf("stu = %d %d %s\n",ptr->num,ptr->age,ptr->name);
+        ptr++;
     }
 
 	int queryNum = atoi(argv[1]);
 	if(queryNum > count - 1)
 	{
-		printf("Query number out of range");
+		printf("Query number out of range\n");
 		return -1;
 	}
-	printf("%d", queryNum);
-	printf("Number: %d, Age: %d, Name: %s", stu[queryNum-1].num, stu[queryNum-1].age, stu[queryNum-1].name);
+	printf("%d\n", queryNum);
+	printf("Number: %d, Age: %d, Name: %s\n", stu[queryNum-1].num, stu[queryNum-1].age, stu[queryNum-1].name);
+    free(stu);
 	return 0;
 }
