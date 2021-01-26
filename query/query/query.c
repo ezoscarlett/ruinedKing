@@ -19,7 +19,7 @@ int parseline(char *line,struct student *ptr)
 	}
 	ptr->num = atoi(token);
 
-	token = strtok(line, delim);
+	token = strtok(NULL, delim);
 	if(atoi(token) == 0)
 	{
 		printf("Invalid age");
@@ -27,7 +27,7 @@ int parseline(char *line,struct student *ptr)
 	}
 	ptr->age = atoi(token);
 
-	token = strtok(line, delim);
+	token = strtok(NULL, delim);
 	strncpy(ptr->name, token, strlen(token));
 	return 0;
 }
@@ -73,24 +73,14 @@ int main(int argc, char *argv[]){
         printf("stu = %d %d %s\n",stu->num,stu->age,stu->name);
         stu++;
     }
-/*#if 0
-	int i;
-	for (i = 0; i < 6; i++)
-	{
-		int res = fscanf(fp, "%d %d %s\n", &stu[i].num, &stu[i].age, stu[i].name);
-		if(res == -1)
-		{
-			fclose(fp);
-			break;
-		}
-	}
-#endif*/
+
 	int queryNum = atoi(argv[1]);
-	if(queryNum > 5)
+	if(queryNum > count - 1)
 	{
 		printf("Query number out of range");
 		return -1;
 	}
+	printf("%d", queryNum);
 	printf("Number: %d, Age: %d, Name: %s", stu[queryNum-1].num, stu[queryNum-1].age, stu[queryNum-1].name);
 	return 0;
 }

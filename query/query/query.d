@@ -1,1 +1,0 @@
-query.o: query.c
