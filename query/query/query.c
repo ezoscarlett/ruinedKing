@@ -60,6 +60,9 @@ int load_file(char *filename,struct student **out,int *num)
     *out = list;
     return 0;
 }
+size_t size(struct student array[]){
+	return sizeof(&array)/sizeof(array[0]);
+}
 int main(int argc, char *argv[]){
     if(argc < 2){
         printf("Usage: %s $num\n",argv[0]);
@@ -78,13 +81,25 @@ int main(int argc, char *argv[]){
     }
 
 	int queryNum = atoi(argv[1]);
-	if(queryNum > count - 1)
+	/*if(queryNum > count - 1)
 	{
 		printf("Query number out of range\n");
 		return -1;
-	}
+	}*/
 	printf("%d\n", queryNum);
-	printf("Number: %d, Age: %d, Name: %s\n", stu[queryNum-1].num, stu[queryNum-1].age, stu[queryNum-1].name);
+
+	for (i = 0; i < size(stu); i++)
+	{
+		if (stu[i].num == queryNum - 1)
+		{
+			printf("Number: %d, Age: %d, Name: %s\n", stu[queryNum-1].num, stu[queryNum-1].age, stu[queryNum-1].name);
+		}
+		else
+		{
+			printf("ID number not found");
+			return -1;
+		}
+	}
     free(stu);
 	return 0;
 }
