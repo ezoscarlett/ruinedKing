@@ -5,7 +5,6 @@ SRC=query.c
 OBJ_FILES := $(patsubst %.c,  %.o, $(SRC) )
 OBJS_D := $(patsubst %.c,%.d,$(SRC))
 
--include  $(OBJS_D)
 .PHONY : all clean
 
 #$(info "objfiles ="$(OBJ_FILES))
@@ -20,3 +19,4 @@ query:$(OBJ_FILES)
 clean:
 	rm -rf query
 	rm -rf *.o *.d
+-include  $(OBJS_D)
