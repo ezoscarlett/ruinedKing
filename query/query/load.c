@@ -1,4 +1,7 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "load.h"
 
 int parseline(char *line,struct student *ptr)
 {
@@ -42,12 +45,15 @@ int load_file(char *filename,struct student **out,int *num)
     printf("there are %d line in %s\n",count,filename);
     fseek(fp, 0L, SEEK_SET);//rewind the fp
 
-    ptr = list = calloc(count,sizeof(struct student));//calloc equal to malloc and memset
+    ptr = list = calloc(1, sizeof(struct student));
+    parseline(line, ptr);
 
     while(fgets(line,1024,fp)!=NULL){
         //TODO parse the line
-        parseline(line,ptr);
-        ptr++;
+    	struct student *new = calloc(1, sizeof(struct student));
+        parseline(line,new);
+        ptr->next = new;
+        ptr = ptr->next;
     }
     fclose(fp); //must close fp when read finish
     *out = list;

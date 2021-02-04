@@ -1,16 +1,18 @@
 #include <stdio.h>
-#include <load.h>
+#include "load.h"
 
-struct student search(struct student *array, int count, int queryNum)
+struct student* search(struct student *head, int count, int queryNum)
 {
-	struct student result = NULL;
-	int i;
-	for (i = 0; i < count; i++)
+	struct student *result = NULL;
+
+	while (head != NULL)
 	{
-		if (array[i].num == queryNum)
+		if (head->num == queryNum)
 		{
-			result = &array[i];
+			result = head;
+			break;
 		}
+		head = head->next;
 	}
 	return result;
 }
