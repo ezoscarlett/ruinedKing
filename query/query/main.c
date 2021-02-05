@@ -5,24 +5,31 @@
 #include "load.h"
 
 int main(int argc, char *argv[]){
-    if(argc < 2){
-        printf("Usage: %s $num\n",argv[0]);
-        return 0;
-    }
     int count = 0;
 	struct student *stu = NULL;
+    char line[8];
     load_file("info.txt",&stu,&count);
 
-	int queryNum = atoi(argv[1]);
-	struct student *result = calloc(1, sizeof(struct student));
-	result = search(stu, count, queryNum);
-	if(result != NULL)
-	{
-		printf("Number: %d, Age: %d, Name: %s\n", result->num, result->age, result->name);
-		return 0;
-	}
-
-	printf("ID number not found");
+	int queryNum = 0;
+	struct student *result = NULL;//calloc(1, sizeof(struct student));
+    while(1){
+        printf("input the num you want search : ");
+        fgets(line,sizeof(line),stdin);
+        if(strlen(line)==0)
+            continue;
+        if(line[0] == 'q')
+            break;
+        queryNum = atoi(line);
+    //    printf("num is %d\n",queryNum);
+        result = search(stu, count, queryNum);
+        if(result != NULL)
+        {
+            printf("Number: %d, Age: %d, Name: %s\n", result->num, result->age, result->name);
+        }else{
+            printf("ID number not found\n");
+        }
+    }
+//    unload_file();
     free(stu);
 	return -1;
 }

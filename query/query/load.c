@@ -25,6 +25,9 @@ int parseline(char *line,struct student *ptr)
 
 	token = strtok(NULL, delim);
 	strncpy(ptr->name, token, strlen(token));
+    char *ptr2 = strstr(ptr->name,"\n");
+    if(ptr2)
+        *ptr2 = 0;
 	return 0;
 }
 int load_file(char *filename,struct student **out,int *num)
