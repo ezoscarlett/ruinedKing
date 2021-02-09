@@ -49,8 +49,11 @@ int load_file(char *filename,struct student **out,int *num)
 		printf("Unable to read info");
 		return -1;
 	}
-    while(read(fd,line,1024)!=NULL){
-        count++;
+    while(read(fd,line,1) == 1){
+        if(*line == "\n")
+        {
+        	count++;
+        }
     }
     *num = count;
     printf("there are %d line in %s\n",count,filename);
@@ -59,7 +62,7 @@ int load_file(char *filename,struct student **out,int *num)
     ptr = list = calloc(1, sizeof(struct student));
     parseline(line, ptr);
 
-    while(fgets(line,1024,fp)!=NULL){
+    while(read(fd,line,1) != -1){
         //TODO parse the line
     	struct student *new = calloc(1, sizeof(struct student));
         parseline(line,new);
