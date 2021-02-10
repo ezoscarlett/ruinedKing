@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "load.h"
 
-struct student* search(struct student *head, int count, int queryNum)
+struct student* search(struct student *head, int queryNum)
 {
 	struct student *result = NULL;
 

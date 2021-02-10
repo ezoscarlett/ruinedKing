@@ -39,47 +39,49 @@ int parseline(char *line,struct student *ptr)
 }
 int readline(int fd, char* line, int length)
 {
+	char *head = line;
 	while(read(fd, line, 1) == 1)
 	{
 		if(*line == '\n')
 		{
+			*line = 0;
 			return 0;
 		}
 		line++;
 	}
+	if(head < line)
+	{
+		return 0;
+	}
 	return -1;
 }
-int load_file(char *filename,struct student **out,int *num)
+int load_file(char *filename,struct student **out)
 {
    	int fd = 0;
 	fd = open(filename, O_RDONLY);
     char line[1024];
-    int count = 0;
-    struct student *list = NULL,*ptr = NULL;
+    struct student *head = NULL,*tail = NULL;
 	if(fd == -1)
 	{
 		printf("Unable to read info");
 		return -1;
 	}
+
     while(readline(fd,line,1024) != -1){
-    	count++;
-    }
-    *num = count;
-    printf("there are %d line in %s\n",count,filename);
-    lseek(fd, 0, SEEK_SET);
-
-    ptr = list = calloc(1, sizeof(struct student));
-    parseline(line, ptr);
-
-    while(read(fd,line,1) != -1){
-        //TODO parse the line
     	struct student *new = calloc(1, sizeof(struct student));
-        parseline(line,new);
-        ptr->next = new;
-        ptr = ptr->next;
+    	parseline(line,new);
+    	if(head == NULL)
+    	{
+    		head = tail = new;
+    	}
+    	else
+    	{
+    		tail->next = new;
+    		tail = new;
+    	}
     }
     close(fd);
-    *out = list;
+    *out = head;
     return 0;
 }
 void free_list(struct student *stu)

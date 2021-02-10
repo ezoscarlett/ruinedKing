@@ -8,5 +8,5 @@ struct student{
 };
 int parseline(char *line,struct student *ptr);
 int readline(int fd, char* line, int length);
-int load_file(char *filename,struct student **out,int *num);
+int load_file(char *filename,struct student **out);
 void free_list(struct student *stu);
