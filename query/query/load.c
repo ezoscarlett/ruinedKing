@@ -37,6 +37,18 @@ int parseline(char *line,struct student *ptr)
 
 	return 0;
 }
+int readline(int fd, char* line, int length)
+{
+	while(read(fd, line, 1) == 1)
+	{
+		if(*line == '\n')
+		{
+			return 0;
+		}
+		line++;
+	}
+	return -1;
+}
 int load_file(char *filename,struct student **out,int *num)
 {
    	int fd = 0;
@@ -49,11 +61,8 @@ int load_file(char *filename,struct student **out,int *num)
 		printf("Unable to read info");
 		return -1;
 	}
-    while(read(fd,line,1) == 1){
-        if(*line == "\n")
-        {
-        	count++;
-        }
+    while(readline(fd,line,1024) != -1){
+    	count++;
     }
     *num = count;
     printf("there are %d line in %s\n",count,filename);
@@ -69,7 +78,17 @@ int load_file(char *filename,struct student **out,int *num)
         ptr->next = new;
         ptr = ptr->next;
     }
-    fclose(fd);
+    close(fd);
     *out = list;
     return 0;
+}
+void free_list(struct student *stu)
+{
+	struct student *mov;
+	while(stu != NULL)
+	{
+		mov = stu;
+		stu = mov->next;
+		free(mov);
+	}
 }

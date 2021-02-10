@@ -14,13 +14,13 @@ int main(int argc, char *argv[]){
 	struct student *result = NULL;//calloc(1, sizeof(struct student));
     while(1){
         printf("input the num you want search : ");
-        fgets(line,sizeof(line),stdin);
+        //readline()
         if(strlen(line)==0)
             continue;
         if(line[0] == 'q')
             break;
         queryNum = atoi(line);
-    //    printf("num is %d\n",queryNum);
+
         result = search(stu, count, queryNum);
         if(result != NULL)
         {
@@ -30,6 +30,7 @@ int main(int argc, char *argv[]){
         }
     }
 //    unload_file();
-    free(stu);
+    free_list(stu);
+    //Free the whole linked-list structure
 	return -1;
 }
