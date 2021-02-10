@@ -34,7 +34,7 @@ int main(int argc, char *argv[]){
             printf("ID number not found\n");
         }
     }
-//    unload_file();
+
     free_list(stu);
 	return -1;
 }
