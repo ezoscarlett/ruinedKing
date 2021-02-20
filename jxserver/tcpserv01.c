@@ -40,15 +40,13 @@ int main(int argc, char **argv)
 		clilen = sizeof(cliaddr);
 		connfd = accept(listenfd, (struct sockaddr *) &cliaddr, &clilen);
         printf("accept a connect from %s\n",inet_ntoa(cliaddr.sin_addr));
-        int n = read(connfd, type, 1);
+        int n = read(connfd, &type, 1);
         if(n == 0)
             close(connfd);
         if(n < 0)
             close(connfd);
-        if(strcmp(type, "1") != 0)
-        	close(connfd);
 
-        n = read(connfd, name_len, 4);
+        n = read(connfd, &name_len, 4);
         if(n == 0)
             close(connfd);
         if(n < 0)
