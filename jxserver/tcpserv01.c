@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/fstat.h>
 #include <string.h>
 #include <fcntl.h>
 #include <netdb.h>
@@ -10,6 +11,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <stdlib.h>
+#include "tcpserv01.h"
 
 int main(int argc, char **argv)
 {
@@ -18,7 +20,10 @@ int main(int argc, char **argv)
 	socklen_t clilen;
 	unsigned char type;
 	int name_len;
+	int target_file;
+	int target_size;
     char file_name[1024];
+    struct stat buf;
 	struct sockaddr_in	cliaddr, servaddr;
 	if (argc != 2){
 		printf("usage: tcpsrv port");
@@ -61,6 +66,14 @@ int main(int argc, char **argv)
 
         printf("File name: %s\n",file_name);
         printf("File name length: %d\n", name_len);
+        target_file = open(file_name, O_RDONLY);
+        fstat(target_file, &buf);
+        target_size = buf.st_size;
+        unsigned char type = 7;
+        write(connfd, &type, 1);
+        write(connfd, &target_size, 4);
+
 //        str_echo(connfd);	/* process the request */
+        //TODO: Pack as a single 'process' function
 	}
 }

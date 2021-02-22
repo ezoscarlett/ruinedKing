@@ -7,6 +7,7 @@
 #include <netdb.h>
 #include <stdlib.h>
 #include <arpa/inet.h>
+#include "tcpcli01.h"
 
 int main(int argc, char **argv)
 {
@@ -38,6 +39,8 @@ int main(int argc, char **argv)
         }
         if(strlen(file_name)==0)
             continue;
+        if(file_name[name_len-1] == "\n")
+        	file_name[name_len-1] = 0;
         if(file_name[0] == 'q')
             break;
 
@@ -46,6 +49,15 @@ int main(int argc, char **argv)
         name_len = strlen(file_name);
         write(sockfd, &name_len, 4);
         write(sockfd, &file_name, name_len);
+        int recv_size;
+        read(sockfd, &type, 1);
+        read(sockfd, recv_size, 4);
+        int recv_fd;
+        recv_fd = open(file_name, O_CREAT);
+        while(recv_size)
+        {
+        	int nread = readn(sockfd)
+        }
     }
     close(sockfd);
 	//str_cli(stdin, sockfd);		/* do it all */

@@ -1,0 +1,620 @@
+Code Review
+The design of enemies(Slime) follows the Open/closed principle. Slimes can execute different moving strategies which are defined in separate interfaces. With this design, new way of slime’s movement can be implemented without changing the existing slime implementation. The design of game levels follows the Single-responsibility principle. There is no dependency between the game and the level builder classes, any change happened to one of the classes will not affect the other.
+Strategy and Builder patterns are used in the code base. Enemies(Slime) can follow two different moving strategies which are implemented according to the Strategy pattern. Builder pattern is used in level, this makes level creation clean. Especially in a case where attributes of a level can vary with different configurations.
+Overall quality of the code base’s document is good. The readme file clearly explains key mechanisms of the system and the JSON file contents. Comments in the code are in good quality especially for the interfaces, all the attributes and functions are documented well. Readability of the codebase is in a high level.
+The design of level and game are generally good. None of the attributes depend on external information. Both classes are easy to extend and implement the three features of the extension.
+
+Extension
+ 
+
+Complete UML Diagram
+
+Level transition functionality is achieved by adjusting GameManager and LevelManager classes. It is possible to include multiple level configurations. Total number of levels will be recorded according to the list of configuration file names. When a level is completed, the game will evaluate if there exists the next level and load the next level if possible.
+Score and time functionality is achieved by implementing observers in entities(Mushroom and MovingObject). When a mushroom is collected or an enemy is dead, the observer will call the addCurrentScore function in GameMnager to alter the score.
+
+Save and load functionality is achieved by implementing memento on the game. All attributes required to restore the game are recorded in the memento when quickSave is called. In order to restore all the entities, Prototype is used for all entities. All of the entities have a clone method to produce their own copies. Then the entities can be retrieved by their copies when the game is loaded.
+ 
+UML For Observer
+
+The design of score and time feature uses the Observer pattern. This follows the Controller and the Low Coupling principles. Entities can directly affect score of the game, the Observer design avoids entities and the game to be tightly coupled. Recording and changing score is a systematic operation of the game, and it should not be performed by low-level objects.
+The design of GameMemonto follows Information Expert and Creator principles, GameManager objects are the only ones that contain enough information to create GameMemonto objects. GameMemonto would not exist without an existing game. The reason I decide to use Memento for this part is I’m following Open-closed principle, information of the game is stored in external objects instead of the game itself. Adding the save and load feature does not violate any of the existing game encapsulation.
+ 
+UML For Prototype
+Continuing with the save and load feature, Prototype is used for all the entities. This is following Polymorphism principle. Entities are with different types of attributes when they are being cloned, different implementation of the clone method will make sure that all entities are correctly cloned when the game is saved. Moreover, in a case where the entities are in a large number and complicated dependencies, cloning entities by creating new objects would be costly and tedious. This design makes the whole process easier.
+One of the outstanding issues of my extension design is that all entities are attached a ScoreObserver while only two of them can affect the game score. ScoreObserver of most entities are useless.
+
+if you cannot see/read the whole UML diagram clearly, please refer to https://lucid.app/invitations/accept/addab1a4-ce35-404b-8ce0-fcbd6f55e3a7
+if you cannot see/read the two partial UML diagrams clearly, please refer to
+https://lucid.app/invitations/accept/68efc74d-bb1d-41cf-97ec-f73fd70edeb6
+
+University of Sydney | School of Computer Science | INFO3333
+INFO3333 Case Study
+1 INTRODUCTION
+As part of your assessment in INFO3333 your Cycle 2 team will be working together on a case study
+in IT failure. Each team will be assigned one of these cases, and you will work on that case in
+Modules 10, 11, 12, and 13. Your work on these cases will include the following deliverables:
+ A Case Study Report, written as a joint effort of the entire team. This is due 11:59pm Sunday
+May 31 (end of week 13). Note that this is a postponement of one week from the original
+due date.
+ A Case Study Oral Presentation, delivered as a joint effort of the entire team (this semester
+you will be delivering this as a video recording rather than a live oral presentation). This is
+due 11:59pm Sunday May 31 (end of week 13).
+ In addition, Tasks 10, 11A and 11B are all based on the work your team will be doing on this
+Case Study. Your Writer(s) for each of these Modules will do some extra analysis work
+(above what is done for the Report and Presentation) and they write their Task Report on
+this extra analysis. This will require additional internal deadlines to be set by the team to
+support this work by your Writer. Note that we now have two Tasks as part of Module 11
+(each requiring a separate Writer), and no Task in Module 12; so you should re-adjust your
+Group Contract to suit this.
+The context of this report is that you imagine that your group is a consultant team working for the
+company involved, in order to inform it of where the company went wrong in Project Management,
+IT Service Management including ITIL, and/or IT Governance. Note that the marks for the Report and
+Oral Presentation are awarded equally to all members of the group (those who
+contribute/participate), while the marks for Tasks 10, 11A and 11B are awarded individually to the
+corresponding Writer.
+1.1 WHY FAILURE?
+You will be analysing IT failures not because you should be learning to do IT projects & services the
+way these were done, but for 2 key reasons:
+ both public and private projects and services are (for reasons of commercial confidence
+among others) not transparent with their documents, and it normally takes a serious failure
+before this information becomes publicly available, and
+ good project and service management is often invisible – a lot of what happens is
+inconspicuous while all the PM/ITSM/ITGOV processes are working as they should be – and
+thus failure is a useful lens for understanding how things should work
+So in this case you will be examining detailed information now in the public domain, in the complex
+context of “real-world” IT.
+In lectures and labs, we will be modelling for you many of the skills, using another case (the TSB
+Bank IT failure in 2018 in UK)
+University of Sydney | School of Computer Science | INFO3333
+1.2 SPECIAL CONSIDERATION OR CIRCUMSTANCES
+These are unusual times, and this assessment is being run in an online way with which the teaching
+staff are not experienced. As such, we understand that we may have misjudged what is feasible or
+how much work is involved in using the new technology tools. If you find (or expect) that some
+aspect is not possible (in the time available for the unit, along with the other work required) then
+please make a private post on the ed discussion board, or else email alan.fekete@sydney.edu.au
+2 THE CASES
+You will be assigned one of the following cases. For each of these you will be given 2 resources to
+start off – a ‘layman’s introduction’, typically a news report, which gives the overall context of the
+project and what happened, as well as a more detailed report, typically an auditor’s report or review
+into the failure itself.
+ The BBC Digital Media Initiative. In 2008 the BBC set out to modernise its infrastructure with
+a large-scale infrastructure upgrade. In 2013 this project was scrapped after spending
+approximately £100 million.
+o https://www.bbc.com/news/entertainment-arts-22651126
+o http://downloads.bbc.co.uk/bbctrust/assets/files/pdf/review_report_research/vfm/
+dmi/pwc_dmi.pdf
+ The US Healthcare.gov health insurance platform. In 2013 the healthcare initiative
+championed by then-President Obama launched its central web platform – this platform had
+major issues with reliability and scale, required major redevelopment after launch, and with
+an initial budget of ~US$100m reached at least US$1.7b.
+o https://www.nytimes.com/2013/10/13/us/politics/from-the-start-signs-of-troubleat-
+health-portal.html
+o https://oig.hhs.gov/testimony/docs/2016/bliss-testimony-032016.pdf
+ The Queensland Health Department Payroll System. In 2007 Queensland Health intended to
+move to a new payroll system. This move was delayed to 2010 – unfortunately after launch
+the system failed, and many employees went without pay or were paid incorrectly for a
+significant period of time. The final cost of this system (originally budgeted at AU$101m)
+after required re-development work was approximately AU$1.2b.
+o https://www.itnews.com.au/news/qld-government-apologises-for-health-payrolldisaster-
+408881
+o http://www.healthpayrollinquiry.qld.gov.au/__data/assets/pdf_file/0008/177902/K
+PMG_Report_dated_31_May_2012.PDF
+ The UK E-Borders scheme (including the Border System Programme successor). In 2003 the
+UK Home Office set out to deliver an automated system for checking passports of
+international arrivals. This system was intended to be complete by 2011, at a cost of
+approximately £750m. After failed delivery, and rollover of the project requirements into a
+larger program (the Border System Programme), the project was re-evaluated to be
+complete by 2019 at a cost of over £1.1b.
+o https://www.bbc.com/news/uk-34988913
+o https://publications.parliament.uk/pa/cm201516/cmselect/cmpubacc/643/643.pdf
+University of Sydney | School of Computer Science | INFO3333
+ The 2016 Australian Census. In 2016 the first ‘primarily digital’ census was conducted in
+Australia, run by the Australian Federal Government with IBM as the main contractor. On
+census night the platform for the census was taken offline, and was not restored for 2 days.
+o https://www.itnews.com.au/news/turnbull-blames-ibm-for-census-failure-433350
+o https://www.aph.gov.au/Parliamentary_Business/Committees/Senate/Economics/2
+016Census/Report
+2.1 A DISCLAIMER ON SCOPE
+Due to the types of projects selected, there are significant competing interests involved, and many
+different perspectives on where the fault lies and, in some cases, precisely what happened. For each
+of these cases, you are not required to resolve these discrepancies – though you will need to decide
+which position you will take if you find resources which disagree with each other. For example, a key
+cited cause of the Census failure revolves around a DDOS attack which some sources dispute – you
+are not required to resolve this. A good rule of thumb is to follow the official report wherever it
+claims a cause or reason (the second link for each case).
+3 YOUR CASE STUDY WORK
+Your team will perform several steps to generate the final Case Study report and Oral Presentation,
+as well as to provide the necessary material for your Writer each week. This will occur in phases
+which align with each Module.
+3.1 MODULE 10
+ Information seeking: While you have been provided with a key resource, for each of these
+cases there are many, many more to find; with further analysis, different areas of focus, or
+different perspectives. You should find more resources for your case. These resources
+should be reliable – with a preference for official audits, reports, or reviews from individuals
+or organisations with direct access to the project, rather than media reports or blogs from
+outsiders (though these are not explicitly banned and can be good as a starting point).
+There is no strict number to be found – and you could feasibly complete a basic report with
+nothing but the provided source – however the quality of your report and how easy it is to
+write will be enabled by the breadth and depth of the sources you gather here.
+ Writing: Case Description. You should in this module write the Case Description section of
+your Case Study Report, using the resources you have located. This should serve as a
+foundation for your analysis to follow. You should cover at a minimum:
+ What organisations were involved
+ What the project was
+ What occurred
+ What the effects were
+ Key figures – timeline, budget, overruns, etc.
+ In addition, there is Task 10 (instructions will come separately) which the Writer needs to do
+during Week 12, based on the material above.
+University of Sydney | School of Computer Science | INFO3333
+3.2 MODULE 11
+ Project Management Analysis: Given the information in the sources you have gathered; you
+must now map the negative events of your case to the PMBOK Knowledge Areas that they
+relate to. While you should focus on the knowledge areas explicitly covered by this unit, a
+look into Procurement Management (Chapter 12 in the Schwalbe text) may prove useful in
+understanding the relationship between different organisations in your case. For example, a
+project going over budget obviously relates to cost management, over schedule = time
+management, etc.
+For much of these there will be a primary observable problem in project management,
+which may itself be the result of some other problem and so on. Quality work at this step
+will trace these issues as far as you have reliable information (you do not need to guess at
+causes, only use information you have found from reliable sources).
+ ITSM Analysis: Given the description and analysis from your earlier work, you should now
+perform similar analysis against the Stages and Processes of IT Service Management / ITIL.
+For this section you will need to do a lot more inference than simply writing about things
+explicitly stated by the sources you have found – and so you are not expected to come to a
+single correct answer, but rather to provide a reasonable and justified possible answer.
+Given observed problem XYZ, what possible error in an ITIL process would cause this? Note
+that not all of these will necessarily be caused by a failure in ITSM (project management
+failures themselves do exist).
+ Writing: Project Management Analysis. You should in this module write the Project
+Management Analysis section of your Case Study Report, using the analysis you have
+conducted.
+ Writing: ITSM Analysis. You should in this module write the ITSM Analysis section of your
+Case Study Report, using the analysis you have conducted.
+ In addition, there are Tasks 11A and 11B (instructions will come separately) which the
+corresponding Writer needs to do during Week 13, based on the material above.
+3.3 MODULE 12
+ ITGOV Analysis: To begin with you will need to determine the overall IT Governance
+situation of the main organisation involved in your case study (the client). This may require
+some further research. What is the governance structure of the organisation? While you
+should attempt to find the governance structure at the time of the failure, if you are not able
+to source this information you may assume it was the same as the current structure.
+You should determine whether this structure tells you anything about the root causes of the
+project failure.
+ Writing: ITGOV Analysis. You should in this module write the ITGOV Analysis section of your
+Case Study Report, using the analysis you have conducted.
+ Writing: Findings. You should in this module write the Findings section of your Case Study
+Report. In this section you will present your overall findings regarding your case study,
+identifying the root cause or causes of the failure based on your PM, ITSM, and ITGOV
+analyses. Note you do NOT need to present a solution, identification is all that is necessary.
+The Writing Resources as well as the lectures will have more on this.
+ Writing: Introduction & Conclusion You should in this module write the Introduction and
+Conclusion sections for your report, as always following the requirements in the Writing
+University of Sydney | School of Computer Science | INFO3333
+Resources. Note that these are Introductions and Conclusions, not introductory or
+concluding paragraphs as described in the How to write a section document.
+ Presentation: In this module you will be required to record and submit your oral
+presentation video for your case study.
+ There is no extra written Task in this Module.
+3.4 ONGOING WORK
+Across each module there are a few things you will need to keep up with:
+ Your regular Effective Team Processes and Individual Contribution to Group Processes work
+and documentation
+ Maintaining references to all sources you use in your report – as always use APA 6th
+ Maintaining a glossary of all technical terms and acronyms you use in your report – as in
+your Tasks make sure you have citations for each of these, using APA 6th. Where you have
+acronyms, the full form is not enough for a glossary entry – you must also include the
+meaning, or a reference to the full form as its own entry in your glossary.
+4 REPORT REQUIRED HEADINGS
+Note that there is a mandatory template for this assignment with these headings included – they are
+replicated here for your reference. Each of these is listed with details in the appropriate Module
+above. Headings 2-5 should be written as sections (see the Writing Resources).
+1. Introduction
+2. Case Description
+3. Project Management Analysis
+4. ITSM Analysis
+5. ITGOV Analysis
+6. Findings
+7. Conclusion
+8. Glossary
+9. References
+10. Appendices
+5 REPORT GENERAL REQUIREMENTS
+The report should be a unified report from your entire team. The word limit for the report (not
+including Glossary, Appendices, etc) is 2500-4000 words – that is, it is anticipated that a report of
+2500 words could meet the requirements, but no penalty will be applied prior to 4000 words. A
+penalty will be applied for reports over 4000 words. You should at all times follow the Writing
+Resources in your report.
+You should ensure that your report is properly structured – any large diagrams or blocks of text from
+sources you feel are necessary should be included as appendices and referenced in your text rather
+than included the main body of the report. Smaller diagrams or snippets may be used where
+appropriate.
+University of Sydney | School of Computer Science | INFO3333
+6 ORAL PRESENTATION
+Your team must record a video presenting your case study. In ordinary years, we would ask you to
+stand in front of your tutorial and present, but this year this is replaced with a video recording which
+you upload to Canvas. The presentation should be 8-10 minutes long, with a hard limit at 10
+minutes. Your presentation should be an ‘executive summary’ of your report, presenting the case
+itself, your analysis, and your findings. The speaker must be visible during your recording.
+You will need to record yourselves delivering this presentation. Since your team will not be (and
+should not be) co-located, one method would be to hold and record a Zoom meeting, with every
+member as co-host, and use screen sharing with speaker view in the participants panel (or, you may
+prefer to have the speaker on-camera while they are speaking, but pause to show a brief view of the
+slide when that slide starts being covered). Or, you can record individual components and then stitch
+them together1.
+You should begin your presentation with a title slide/frame containing your team name, a list of the
+SIDs of the students who are presenting, and the title of your allocated case study. This should be
+followed up with an agenda slide indicating the sections of your presentation in order, with the SIDs
+of the people presenting them. This agenda slide should be repeated between each section with the
+appropriate line highlighted. All team members must speak during the presentation – and this
+speaking part must be non-trivial, i.e. should run for a reasonable share of the 8-10 minutes, and
+present some meaningful content (i.e. more than ‘Hello we are team x and today we will be talking
+to you about y’). Only team members present in this way in the recording may be awarded the team
+mark for this assessment.
+Dissemination of recording: your recording which you upload to Canvas, will be seen by the marker,
+and perhaps also by other members of the teaching staff. In previous years, we believe students
+benefited from watching the presentations of other groups, during tutorial. If you choose to allow
+other students from the unit to view your recording (after the due date), then you can also upload a
+copy to a second submission link on Canvas.
+1 (if nobody in your group has software for this which they are familiar with, then open source solutions such
+as https://kdenlive.org/ are available; this also supports a ‘talking head’ inset see
+https://forum.kde.org/viewtopic.php?f=270&t=112071
+University of Sydney | School of Computer Science | INFO3333
+7 MARKING GUIDES
+7.1 REPORT (10%)
+ Description (1%)
+o This is assessed on accuracy and completeness.
+ Analysis (3%)
+o This is a holistic assessment across PM, ITSM, and ITGOV – a particularly good
+analysis in any 1 will pull the entire mark up, and vice versa for a poor analysis
+o The assessment is on whether you have presented a reasonable, justified argument
+for your findings – whether by citing evidence that directly states this (particularly
+for PM), or that your inferences are backed up by the initial sources and what the
+unit teaches about ITSM and ITGOV.
+ Findings (1%)
+o This is also assessed on whether you present sufficient and convincing justification
+for your position. You do not need to find ‘the single perfect’ finding, and there are
+likely to be multiple that may be justified – the strength of your argument is the key.
+ Writing Requirements (4%)
+o These are assessed based on the Writing Resources
+o Topic Sentences & Paragraphs (1%)
+o Introduction & Conclusion (1%)
+o Cohesiveness (0.5%)
+o Glossary, Bibliography, Citations (1%) – note severe issues here may result in further
+penalties up to and including receiving 0 for unreferenced work and/or being
+reported for breaching Academic Integrity requirements
+o Spelling, Grammar, Tone (0.5%)
+ Penalties
+o If your report excluding Glossary, References, and Appendices is over 4000 words,
+you will receive a 2% penalty
+o If your report does not use (or faithfully reproduce) the provided Template, you will
+receive a 2% penalty
+University of Sydney | School of Computer Science | INFO3333
+7.2 ORAL PRESENTATION (5%)
+ Convincingness (1%)
+o Does your presentation properly present the content of your report to convince the
+audience of your stated findings?
+ Confidence (1%)
+o Do you appear relaxed and confident?
+o Do you speak to your audience (in this case the camera)?
+ Speech (1%)
+o Do you visibly read from slides or notes?
+o Do you speak at an appropriate pace?
+o Do you speak at an appropriate volume & clarity?
+ Visual Aids (1%)
+o Is all text easy to read?
+o Are all tables and diagrams easy to read?
+o Are all aids used relevant and useful?
+ Timing (1%)
+o Are the sections of your presentation divided well into the available time?
+ Penalties
+o If you go over the 10-minute maximum your mark will be capped at 2/5
+o If you do not follow the mandatory requirements (title slide, agenda, transitions)
+your mark will be capped at 2/5
+
+INFO3333 Task 3 Report
+Jiuxin Zhang (jzha0558)
+Contents
+1. Introduction
+2. Scope Statement
+3. WBS
+4. Comparison of Approaches
+5. SMART Objectives Impact
+6. Conclusion
+7. Glossary
+8. Bibliography
+9. Appendices
+Introduction
+This report includes a complete scope statement for the particular project. Project scoping
+outputs and requirement analysis will also be described. Finally a comparison of two scoping
+management approaches will be conducted in this report.
+Scope Statement
+Project Justification / Needs
+The University provides many ways for staff to connect with students and vice versa, but
+mechanisms for students to connect with other students are less robust and often fragmented.
+Students often have information they wish to share, especially in times of change or disruption.
+It would be beneficial to have a university-provided platform that all students could access and
+participate in for this purpose.
+Budget: AU$200,000
+Deadline: 9 months
+Project goal
+The project must deliver a web-based platform for students to share and view
+useful information for time-relevant topics such as events, changes, or disruptions.
+Objectives
+Build a web-based platform for USYD individuals (student, staff) to connect with each other
+within the time-frame of 9 months and AU$200,000 budget.
+This platform should have certain functions for USYD individuals to share and view critical
+information for current topics like events, changes or disruptions.
+To investigate, analyze, define and develop a customizable web-based platform to share events
+in the university and share information of registered students and staff, and provide efficient
+communication between them.
+Students would enjoy convenience to find the most updated and useful (trustworthy) news
+relevant to the university cohort on this platform, especially in times of change and disruption.
+The application shall be implemented in the most popular website platforms.
+Advanced social interactions will be implemented as the project’s standing-out feature.
+Summary of Project Deliverables:
+A web-based platform allowing USYD students and staff to conveniently share and view
+information.
+Further user service based on any problems related to the platform usage.
+Requirements In-Scope:
+- Users can search for posts, based on the publisher’s name, publishing date, etc.
+- Users can forward others’ posts.
+- For staff editing posted threads, once a change occurred, everyone who was related to the
+threads should be informed about the change.
+- Users can receive notifications about new events and activities.
+- Tutors should be allowed to choose whether they want to post certain information to the public
+or they only want to share that information among staff.
+- Users should be allowed to edit posted threads.
+- Users can add friends with each other.
+- Users can build a group chat.
+- Users can establish official accounts, i.e. clubs, societies. Etc, which would send news from
+time to time.
+- When users are posting events to others on the platform, certain functions should be added to
+show audiences’ attitudes (eg.like or dislike button), comments as well.
+- Users are able to find anyone who is now working or studying in USYD with their information
+like name and etc. Then they can have a private real-time conversation.
+- Users can post pictures, short videos, text, etc. on the platform.
+- Users want to have an Information blocking function, for example, blocking all the posts sent
+by a certain person.
+- There should also be different sections in the platform, such as study, activity, complaint
+section, which allows a student to post in different sections, and the website would be neater.
+- It should be easy for users to get familiar with it. It should be a user-friendly platform.
+-Users can see the information that is most useful to them. Sorting based on popularity, posting
+time, discussion volume, etc.
+-There is a function to show the views of each public event.
+- Users can find anyone with similar interests or hobbies by this platform.
+- Users can join the posted event directly. Once joined, they would be assigned to group chat to
+get to know each other beforehand.
+- When posting an event, certain limits could be set by the poster. For example, the number of
+participants, groups .etc.
+Line: In-scope requirements are those that are relevant to our objectives or making optimization
+for the project.
+Requirements Out-Of-Scope:
+- This platform should be able to deliver an online class due to the current situation.
+- Users want to have an online bookstore.
+Project Success Criteria:
+The application is widely used by USYD students and staff and all functionalities are performing
+properly.
+Any problem about the application can be solved by the project service team or the related
+USYD ICT staff.
+WBS
+1.1 Concept:
+1.1.1 Define objectives
+1.1.2 Define requirements
+1.1.2.1 Interview potential users
+1.1.2.2 Summarize interview record
+1.1.2.3 Define user requirements
+1.1.2.4 Prioritize user requirements
+1.1.2.5 Define in-scope and out-scope requirements
+1.1.3 Define success criteria
+1.1.4 Define procurement plan
+1.1.4.1 Rent a server
+1.1.4.2 Hire people if needed
+1.2 Platform design
+1.2.1 Design UI
+1.2.1.1 Analyse use case scenario
+1.2.1.2 Develop storyboard
+1.2.1.3 Present to the stakeholders
+1.2.2 Design program logic
+1.2.2.1 Model the underlying logical layer of the project
+1.2.2.2 Model how the information would be stored in the database
+1.3 Platform development
+1.3.1 Develop UI
+1.3.1.1 Develop HTML pages
+1.3.1.1.1 Develop HTML plaintext files
+1.3.1.1.2 Develop CSS scripts of the files
+1.3.1.1.3 Develop JS functions of the files
+1.3.2 Develop database storage structure
+1.3.2.1 Develop storage tables
+1.3.3 Develop program logic
+1.3.3.1 Write functions to link to database layer and UI layer
+1.3.3.2 Write functions that fulfill the requirements:
+1.3.3.2.1 Interaction among users
+1.3.3.2.1.1 Conversation between users
+1.3.3.2.1.2 Add friends
+1.3.3.2.1.3 Build group chats
+1.3.3.2.2 Posting (staff and student) (event)
+1.3.3.2.2.1 Search and filter function (friend and post)
+1.3.3.2.2.2 Edit post
+1.3.3.2.2.3 Receive notification
+1.3.3.2.2.4 Forward post
+1.3.3.2.2.5 Comment
+1.3.3.2.3 Establish official account
+1.3.4 Testing
+1.3.4.1 Software testing
+1.3.4.1.1 Unit testing
+1.3.4.1.1.1 Test for interaction functions
+1.3.4.1.1.2 Test for posting functions
+1.3.4.1.1.3 Test for establishing official account functions
+1.3.4.1.2 Integration testing & System testing
+1.3.4.2 Acceptance testing
+1.3.4.2.1 Stakeholders reviewal
+1.4 Rollout
+1.4.1 Train the USYD staff to use the platform
+1.4.2 Require the USYD staff to inform students the publish of the platform
+1.4.2.1 Inform the students by emailing the students
+1.4.2.2 Tutors inform the students orally in class
+1.5 Support
+1.5.1 Maintain the platform during the contract time
+1.5.1.1 Fixing the platform if the platform corrupted or has logical issues
+1.5.1.2 Update the platform according to change requests
+1.5.1.3 Optimise the platform using feedbacks from staffs and students
+User Stories
+Important (as relevant to our objectives)
+- As a student user, I want to use that platform to follow my friends and posts that I may find
+interesting.
+- As a student user, I want to be notified only of the important posts. Please block meaningless
+posts.
+- As a student user, I want to be timely notified of the important news.
+- As a graduating student user, I want to find employment-related news.
+- As a graduating student user, I want to find co-curricular activities to be part of.
+- As a freshman student user, I want to find ways to make new friends.
+- As a parent of a USYD student, I want to find important news such as the precautionary
+measures happening in times of epidemic.
+- As a tutor user, I want to find ways to update posts easily and notify students easily.
+- As a tutor user, I want to find ways to share news with the staff only.
+Relatively Important (as less relevant to our objectives)
+- As a graduating student user, I want to find guides and ways to seek jobs.
+- As a parent of a USYD student, I want to find the rank of the University easily.
+- As a freshman student user, I want to find friends to play electronic games with..
+- As a student user, I want to follow my friends and know more about their interests and
+favourites.
+- As a student user, I want to monitor my boyfriend on this platform.
+Summary of requirements according to the user stories collected through interview:
+● The application should also allow students to be notified of important news timely.
+● The application should also allow students to block those posts which they do not need
+or find troublesome to read. Timely Recommender/Blocker feature should be in place.
+● Staff users and student users should have different rights and privileges.
+In alignment with our objectives, the important user stories are selected and compared with the
+scope defined obtained during the brainstorming phase and the requirements collected during
+PMBOK requirements elicitation phase. Moreover, requirements are modified and improved, by
+considering that the interviewees raised an important insight that has been overlooked, the
+recommender/blocker system.
+Comparison of Approaches
+Similarity between the PMBOK and the agile approach is that both techniques define the project
+requirements by acquiring information directly from the stakeholders.
+As for differences, requirements are gathered and defined before any work is commenced with
+the PMBOK approach. With the agile approach, interactions between the stakeholders and the
+developers will continue in the working process. In case of requirement changing, the PMBOK
+approach will need formal process and leaders’ decision to adjust the workflow or project plan,
+while the agile approach recognizes all changes as a part in the working process. In PMBOK
+technique, stakeholders express their concerns in early discussions that produce the vital
+documents, and they do not engage much with the working process afterwards. In the agile
+technique, the stakeholders will take part in most of the working process, ensuring their goals
+are being achieved.
+PMBOK can organize requirements and further working processes well as most information is
+defined in the early stages. However this technique relies heavily on the project’s senior
+leaders, both when making early plans and dealing with changes. Bad decisions by the
+leadership may lead to very serious consequences.
+Agile technique will make all the working processes smooth as the project team and the
+stakeholders keep communicating. Goals will be achieved without major disruptions caused by
+changed requirements. However, the agile approach will be difficult to execute in bigger projects
+as the costs of communicating will rapidly increase.
+SMART Objectives Impact
+In the stage of completing the ‘objectives’ section of the scope statement, we had started
+considering the ‘SMART’ principles, and used this way of thinking throughout the whole
+process. While prioritizing the requirements, we divided the requirements into 3 groups: Very
+Important, Important and Normal. Then their time costs and expenses were combined to
+calculate the priorities. In this part, we carefully analysed all the individual requirement items
+according to the ‘SMART’ nature of our objectives. We particularly focused on the relevant
+principle when conducting requirement prioritisation.
+Conclusion
+Overall, PMBOK and agile techniques have their own advantages and disadvantages in scoping
+management. To produce the best outcome, any project team should choose the technique
+based on the project’s features and other conditions.
+Glossary
+Goal
+An aim or outcome which a person, group, or organization works towards or strives to achieve;
+the object of a person’s ambition or effort.
+( Simpson,1993 )
+Objective
+Of or relating to the end or purpose as the cause of action
+( Simpson,1993 )
+Scope
+Scope refers to all the work involved in creating the products of the project and the processes
+used to create them.
+(Schwalbe,2016)
+Requirement
+“1. A condition or capability needed by a user to solve a problem or achieve an objective.
+2. A condition or capability that must be met or possessed by a system or system component
+to satisfy a contract, standard, specification, or other formally imposed documents.
+3. A documented representation of a condition or capability as in 1 or 2.”
+(Schwalbe,2016)
+“conditions or capabilities that must be met by the project or present in the product, service, or
+result to satisfy an agreement or other formally imposed specification.”
+(Schwalbe,2016)
+SMART
+The SMART criteria are guidelines suggesting that milestones should be:
+- Specific
+- Measurable
+- Assignable
+- Realistic
+- Time-framed
+(Schwalbe,2016)
+Specific
+Having a special determining quality.
+( Simpson,1993 )
+Manageable
+Amenable to control or guidance; tractable or workable; capable of being wielded, manipulated,
+or administered.
+( Simpson,1993 )
+Achievable
+Capable of being achieved.
+( Simpson,1993 )
+Relevant
+Bearing on or connected with the matter in hand; closely relating to the subject or point at issue;
+pertinent to a specified thing.
+( Simpson,1993 )
+Time-bound
+Scheduled at an appropriate time
+(Schwalbe,2016)
+Decomposition
+Subdividing project deliverables into smaller pieces
+(Schwalbe,2016)
+Success criteria
+Is the criterias for measuring the success of the project
+(Schwalbe,2016)
+Deliverable
+Deliverable is a product or service, such as a technical report, a training session, a piece of
+hardware, or a segment of software code, produced or provided as part of a project.
+(Schwalbe,2016)
+User story
+User stories are short descriptions written by customers of what they need a system to do for
+them. These descriptions should be about three sentences long. They provide the basis for time
+estimates for the sprint planning meeting. User stories should be testable and small enough that
+programmers can complete and unit test their code in a timely manner.
+(Schwalbe,2016)
+Persona
+An assumed character or role
+( Simpson,1993 )
+Bibliography
+Schwalbe, K. (2016). Information Technology Project Management (8th ed.). Cengage
+Learning.
+Simpson, J. A. (1993). Oxford English dictionary. Oxford: Clarendon Press.
+Sam, G., Danny, F., Thomas, D., Brian, W., & Danielle, C. L. (2015). Enhance
+PMBOK® by Comparing it with P2M, ICB, PRINCE2, APM and Scrum Project
+Management Standards
+PM World Journal, Vol. IV, Issue IX
+Appendices
+PMBOK interview record:
+USYD Students :
+Name: Lin Liu
+Degree: Bachelor of Engineer
+Name: Edward Xie
+Degree: Bachelor of Economy
+Name: Adam Huang
+Degree: Bachelor of Engineering
+Name: Rachel Yang
+Degree: Bachelor of Engineering
+
+Name: Wenzhe Zhang
+Degree: Bachelor of Arts
+Tutor:
+Name: Vivian Xu (Usyd tutor)
+Name: Anonymous
+Degree: Bachelor of Project Management
+Name: Kennan Lee
+Degree: Bachelor of Science
+Name: Jarryd Harris
+Degree: Bachelor of Science
