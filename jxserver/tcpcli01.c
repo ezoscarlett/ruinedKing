@@ -40,9 +40,11 @@ int main(int argc, char **argv)
         	printf("Failed to capture input\n");
         	return -1;
         }
-        if(strlen(file_name)==0)
+        printf("filename: %s\n", file_name);
+        name_len = strlen(file_name);
+        if(strlen(file_name) == 1)
             continue;
-        if(&file_name[name_len-1] == "\n")
+        if(file_name[name_len-1] == '\n')
         	file_name[name_len-1] = 0;
         if(file_name[0] == 'q')
             break;
