@@ -47,6 +47,7 @@ int main(int argc, char **argv)
             close(connfd);
 
         n = read(connfd, &name_len, 4);
+        printf("try read 4 bytes and return %d bytes\n",n);
         if(n == 0)
             close(connfd);
         if(n < 0)
@@ -60,7 +61,7 @@ int main(int argc, char **argv)
         file_name[n] = 0;
 
         printf("File name: %s\n",file_name);
-        printf("File name length: %d\n", name_len);
+        printf("File name length: %d,%x\n", name_len,name_len);
 //        str_echo(connfd);	/* process the request */
 	}
 }

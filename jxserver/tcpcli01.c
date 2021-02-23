@@ -43,8 +43,15 @@ int main(int argc, char **argv)
 
         unsigned char type = 1;
         write(sockfd, &type, 1);
-        name_len = strlen(file_name);
-        write(sockfd, &name_len, 4);
+        name_len = 0x0102;//strlen(file_name);
+        char *ptr = (char *)&name_len;
+        write(sockfd, ptr++, 1);
+        sleep(1);
+        write(sockfd, ptr++, 1);
+        sleep(1);
+        write(sockfd, ptr++, 1);
+        sleep(1);
+        write(sockfd, ptr, 1);
         write(sockfd, &file_name, name_len);
     }
     close(sockfd);
