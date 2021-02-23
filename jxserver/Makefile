@@ -1,7 +1,7 @@
 CC=gcc
 #CFLAGS=-Wall -Werror -Wno-error=unused-variable -g
-CLIENT_SRC=tcpcli01.c
-SERVER_SRC=tcpserv01.c
+CLIENT_SRC=tcpcli01.c readn.c writen.c
+SERVER_SRC=tcpserv01.c readn.c writen.c
 
 CLIENT_OBJ_FILES := $(patsubst %.c,  %.o, $(CLIENT_SRC) )
 SERVER_OBJ_FILES := $(patsubst %.c,  %.o, $(SERVER_SRC) )

@@ -1,17 +1,24 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <sys/fstat.h>
+#include <sys/stat.h>
 #include <string.h>
 #include <fcntl.h>
 #include <netdb.h>
+#include <stddef.h>
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <stdlib.h>
-#include "tcpserv01.h"
+#include "readn.h"
+#include "writen.h"
+
+int process(void* fd)
+{
+	return 0;
+}
 
 int main(int argc, char **argv)
 {
@@ -23,6 +30,7 @@ int main(int argc, char **argv)
 	int target_file;
 	int target_size;
     char file_name[1024];
+    char target_buf[1024];
     struct stat buf;
 	struct sockaddr_in	cliaddr, servaddr;
 	if (argc != 2){
@@ -72,6 +80,20 @@ int main(int argc, char **argv)
         unsigned char type = 7;
         write(connfd, &type, 1);
         write(connfd, &target_size, 4);
+        while(target_size)
+        {
+        	int read_size = target_size;
+        	if(target_size > 1024)
+        		read_size = 1024;
+        	if(readn(target_file, target_buf, read_size) != read_size)
+        	{
+        		break;
+        		printf("Error while reading target file\n");
+        	}
+        	target_size -= read_size;
+        	writen(connfd, target_buf, read_size);
+        }
+
 
 //        str_echo(connfd);	/* process the request */
         //TODO: Pack as a single 'process' function

@@ -6,14 +6,17 @@
 #include <fcntl.h>
 #include <netdb.h>
 #include <stdlib.h>
+#include <stddef.h>
 #include <arpa/inet.h>
-#include "tcpcli01.h"
+#include "readn.h"
+#include "writen.h"
 
 int main(int argc, char **argv)
 {
 	int sockfd;
 	struct sockaddr_in servaddr;
 	char file_name[1024];
+	char recv_buf[1024];
 	int name_len;
 	if (argc != 3){
 		printf("usage: tcpcli <IPaddress> port");
@@ -39,7 +42,7 @@ int main(int argc, char **argv)
         }
         if(strlen(file_name)==0)
             continue;
-        if(file_name[name_len-1] == "\n")
+        if(&file_name[name_len-1] == "\n")
         	file_name[name_len-1] = 0;
         if(file_name[0] == 'q')
             break;
@@ -51,12 +54,21 @@ int main(int argc, char **argv)
         write(sockfd, &file_name, name_len);
         int recv_size;
         read(sockfd, &type, 1);
-        read(sockfd, recv_size, 4);
-        int recv_fd;
-        recv_fd = open(file_name, O_CREAT);
+        read(sockfd, &recv_size, 4);
+        int new_file_fd;
+        new_file_fd = open("report_recv.txt", O_CREAT);
         while(recv_size)
         {
-        	int nread = readn(sockfd)
+        	int read_size = recv_size;
+        	if(recv_size > 1024)
+        		read_size = 1024;
+        	if(readn(sockfd, recv_buf, recv_size) != read_size)
+        	{
+        		break;
+        		printf("Error while reading target file\n");
+        	}
+        	recv_size -= read_size;
+        	writen(new_file_fd, recv_buf, read_size);
         }
     }
     close(sockfd);
