@@ -8,9 +8,10 @@ ssize_t writen(int fd, const void *ptr, size_t n)
 	nleft = n;
 	while (nleft > 0) {
 		if ((nwritten = write(fd, ptr, nleft)) < 0) {
-			if (nleft == n)
+			if (nleft == n){
+                perror("write fail");
 				return(-1); /* error, return -1 */
-			else
+            }else
 				break;      /* error, return amount written so far */
 		} else if (nwritten == 0) {
 			break;

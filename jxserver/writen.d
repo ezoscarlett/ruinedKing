@@ -1,1 +1,0 @@
-writen.o: writen.c

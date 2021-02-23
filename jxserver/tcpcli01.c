@@ -40,7 +40,7 @@ int main(int argc, char **argv)
         	printf("Failed to capture input\n");
         	return -1;
         }
-        printf("filename: %s\n", file_name);
+        file_name[n_read] = 0;
         name_len = strlen(file_name);
         if(strlen(file_name) == 1)
             continue;
@@ -48,6 +48,7 @@ int main(int argc, char **argv)
         	file_name[name_len-1] = 0;
         if(file_name[0] == 'q')
             break;
+        printf("filename: %s\n", file_name);
 
         unsigned char type = 1;
         write(sockfd, &type, 1);
@@ -57,8 +58,12 @@ int main(int argc, char **argv)
         int recv_size;
         read(sockfd, &type, 1);
         read(sockfd, &recv_size, 4);
-        int new_file_fd;
-        new_file_fd = open("report_recv.txt", O_CREAT);
+        FILE *fp = NULL;
+        fp = fopen("report_recv.txt", "w");
+        if(fp == NULL){
+            perror("can't create file ");
+            return 0;
+        }
         while(recv_size)
         {
         	int read_size = recv_size;
@@ -70,8 +75,10 @@ int main(int argc, char **argv)
         		printf("Error while reading target file\n");
         	}
         	recv_size -= read_size;
-        	writen(new_file_fd, recv_buf, read_size);
+        	int n = writen(fileno(fp), recv_buf, read_size);
+            printf("write %d,%d bytes to file\n",read_size,n);
         }
+        fclose(fp);
     }
     close(sockfd);
 	//str_cli(stdin, sockfd);		/* do it all */
