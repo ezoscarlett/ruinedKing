@@ -24,9 +24,6 @@ int process(int fd)
 	char file_name[1024];
 	char target_buf[1024];
     struct stat buf;
-	//TODO
-	//if any error happen, return -1;
-	//if(process(connfd) < 0) close(connfd);
     int n = read(fd, &type, 1);
     //
     if(n == 0 || n < 0)
@@ -49,7 +46,6 @@ int process(int fd)
     type = 7;
     write(fd, &type, 1);
     write(fd, &target_size, 4);
-    printf("targetsize: %d", target_size);
     while(target_size)
     {
     	int read_size = target_size;
@@ -102,7 +98,7 @@ int main(int argc, char **argv)
         if(process_num < 0)
         	printf("Server processing error, terminating");
         	close(connfd);
-        	break
+        	break;
 
 //        str_echo(connfd);	/* process the request */
 	}

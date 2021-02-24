@@ -60,7 +60,6 @@ int main(int argc, char **argv)
         read(sockfd, &recv_size, 4);
         int new_file_fd;
         new_file_fd = open("report_recv.txt", O_CREAT, S_IRWXO);
-        //TODO: Figure out usage of open
         if(new_file_fd < 0){
             perror("can't create file ");
             return 0;
