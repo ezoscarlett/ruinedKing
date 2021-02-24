@@ -58,9 +58,10 @@ int main(int argc, char **argv)
         int recv_size;
         read(sockfd, &type, 1);
         read(sockfd, &recv_size, 4);
-        FILE *fp = NULL;
-        fp = fopen("report_recv.txt", "w");
-        if(fp == NULL){
+        int new_file_fd;
+        new_file_fd = open("report_recv.txt", O_CREAT, S_IRWXO);
+        //TODO: Figure out usage of open
+        if(new_file_fd < 0){
             perror("can't create file ");
             return 0;
         }
@@ -75,10 +76,10 @@ int main(int argc, char **argv)
         		printf("Error while reading target file\n");
         	}
         	recv_size -= read_size;
-        	int n = writen(fileno(fp), recv_buf, read_size);
+        	int n = writen(new_file_fd, recv_buf, read_size);
             printf("write %d,%d bytes to file\n",read_size,n);
         }
-        fclose(fp);
+        close(new_file_fd);
     }
     close(sockfd);
 	//str_cli(stdin, sockfd);		/* do it all */
