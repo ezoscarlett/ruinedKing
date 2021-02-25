@@ -63,7 +63,7 @@ int main(int argc, char **argv)
         read(sockfd, &type, 1);
         read(sockfd, &recv_size, 4);
         FILE *new_file_fp = NULL;
-        new_file_fp = fopen("report_recv.txt", O_CREAT);
+        new_file_fp = fopen("report_recv.txt", "w");
         if(new_file_fp == NULL){
             perror("can't create file ");
             return 0;

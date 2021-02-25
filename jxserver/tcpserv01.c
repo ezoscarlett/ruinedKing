@@ -18,27 +18,27 @@
 
 void* process(void *arg) //should change to both void pointers
 {
+    int fd = *((int *)arg);
+    unsigned char type;
+    int name_len;
+    int target_file;
+    int target_size;
+    char file_name[1024];
+    char target_buf[1024];
+    struct stat buf;
 	while(1) {
-		int fd = *((int *)arg);
-		unsigned char type;
-		int name_len;
-		int target_file;
-		int target_size;
-		char file_name[1024];
-		char target_buf[1024];
-		struct stat buf;
 		int n = read(fd, &type, 1);
 		//
 		if (n == 0 || n < 0)
-			return (void *)-1;
+			break;
 
 		n = read(fd, &name_len, 4);
 		if (n == 0 || n < 0)
-			return (void *)-1;
+			break;
 
 		n = read(fd, file_name, name_len);
 		if (n == 0 || n < 0)
-			return (void *)-1;
+			break;
 		file_name[n] = 0;
 
 		printf("File name: %s\n", file_name);
@@ -54,14 +54,17 @@ void* process(void *arg) //should change to both void pointers
 			if (target_size > 1024)
 				read_size = 1024;
 			if (readn(target_file, target_buf, read_size) != read_size) {
-				break;
 				printf("Error while reading target file\n");
+				break;
 			}
 			target_size -= read_size;
 			int n = writen(fd, target_buf, read_size);
 			printf("write %d,%d bytes to fd\n", read_size, n);
 		}
 	}
+    printf("connect lost\n");
+    close(fd);
+    return NULL;
 }
 
 int main(int argc, char **argv) {
@@ -95,15 +98,17 @@ int main(int argc, char **argv) {
 		clilen = sizeof(cliaddr);
 		connfd = accept(listenfd, (struct sockaddr*) &cliaddr, &clilen);
 		printf("accept a connect from %s\n", inet_ntoa(cliaddr.sin_addr));
-		err = pthread_create(&ntid, NULL, process, (void*)connfd);
+		err = pthread_create(&ntid, NULL, process, &connfd);
 		if(err != 0)
 			perror("Creating thread failed");
+#if 0
 		pthread_join(ntid, &process_ret);
 		if (*((int *)process_ret) < 0)
 			perror("Server processing error, terminating");
 		close(connfd);
 		break;
 
+#endif
 //        str_echo(connfd);	/* process the request */
 	}
 }
