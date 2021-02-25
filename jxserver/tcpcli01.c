@@ -31,7 +31,11 @@ int main(int argc, char **argv)
 	servaddr.sin_port = htons(serv_port);
 	inet_pton(AF_INET, argv[1], &servaddr.sin_addr);
 
-	connect(sockfd, (struct sockaddr *) &servaddr, sizeof(servaddr));
+	int ret = connect(sockfd, (struct sockaddr *) &servaddr, sizeof(servaddr));
+	if(ret < 0)
+	{
+		perror("Binding failed:");
+	}
     while(1){
     	printf("Input File Name: \n");
         int n_read = read(0, file_name, sizeof(file_name));
@@ -58,9 +62,9 @@ int main(int argc, char **argv)
         int recv_size;
         read(sockfd, &type, 1);
         read(sockfd, &recv_size, 4);
-        int new_file_fd;
-        new_file_fd = open("report_recv.txt", O_CREAT, S_IRWXO);
-        if(new_file_fd < 0){
+        FILE *new_file_fp = NULL;
+        new_file_fp = fopen("report_recv.txt", O_CREAT);
+        if(new_file_fp == NULL){
             perror("can't create file ");
             return 0;
         }
@@ -75,10 +79,10 @@ int main(int argc, char **argv)
         		printf("Error while reading target file\n");
         	}
         	recv_size -= read_size;
-        	int n = writen(new_file_fd, recv_buf, read_size);
+        	int n = writen(fileno(new_file_fp), recv_buf, read_size);
             printf("write %d,%d bytes to file\n",read_size,n);
         }
-        close(new_file_fd);
+        fclose(new_file_fp);
     }
     close(sockfd);
 	//str_cli(stdin, sockfd);		/* do it all */
