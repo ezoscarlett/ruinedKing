@@ -8,6 +8,7 @@
 #include <stddef.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <dirent.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -16,50 +17,103 @@
 #include "readn.h"
 #include "writen.h"
 
-void* process(void *arg) //should change to both void pointers
+int transfer_file(int fd, char *file_name)
 {
-    int fd = *((int *)arg);
-    unsigned char type;
-    int name_len;
     int target_file;
     int target_size;
-    char file_name[1024];
     char target_buf[1024];
     struct stat buf;
+	target_file = open(file_name, O_RDONLY);
+	fstat(target_file, &buf);
+	target_size = buf.st_size;
+	unsigned char response_req_type = 7;
+	write(fd, &response_req_type, 1);
+	write(fd, &target_size, 4);
+	while (target_size) {
+		int read_size = target_size;
+		if (target_size > 1024)
+			read_size = 1024;
+		if (readn(target_file, target_buf, read_size) != read_size) {
+			printf("Error while reading target file\n");
+			break;
+		}
+		target_size -= read_size;
+		int n = writen(fd, target_buf, read_size);
+		printf("write %d,%d bytes to fd\n", read_size, n);
+	}
+	return 0;
+}
+
+int list_dir(int fd)
+{
+	int dir_size = 0;
+	DIR *dp;
+	struct dirent *dirp;
+	char *dirname = "\\";
+	//char *dir_ret;
+	if((dp = opendir(dirname)) == NULL)
+	{
+		printf("Failed to read directory\n");
+		return -1;
+	}
+	while((dirp = readdir(dp)) != NULL)
+	{
+		dirp = readdir(dp);
+		dir_size += 1;
+	}
+	closedir(dp);
+	return 0;
+}
+
+void help_msg(int fd)
+{
+	unsigned char response = 8;
+	char* help_msg = "Enter \"ls\" to display all server directories\n"
+			"Enter \"get target_name local_saving_name\" to retrieve file, example: get a.txt b.txt\n"
+			"Enter \"q\" to quit the program\n";
+	int msg_size = strlen(help_msg);
+	write(fd, &response, 1);
+	write(fd, &msg_size, 4);
+	int n = writen(fd, help_msg, msg_size);
+	printf("write %d,%d bytes to fd\n", msg_size, n);
+}
+
+void* process(void *arg)
+{
+    int fd = *((int *)arg);
+    unsigned char req_type;
+    int command_len;
+    char command[1024];
+    char *file_name;
+
 	while(1) {
-		int n = read(fd, &type, 1);
+		int n = read(fd, &req_type, 1);
 		//
 		if (n == 0 || n < 0)
 			break;
 
-		n = read(fd, &name_len, 4);
+		n = read(fd, &command_len, 4);
 		if (n == 0 || n < 0)
 			break;
 
-		n = read(fd, file_name, name_len);
+		n = read(fd, command, command_len);
 		if (n == 0 || n < 0)
 			break;
-		file_name[n] = 0;
+		command[n] = 0;
 
-		printf("File name: %s\n", file_name);
-		printf("File name length: %d\n", name_len);
-		target_file = open(file_name, O_RDONLY);
-		fstat(target_file, &buf);
-		target_size = buf.st_size;
-		type = 7;
-		write(fd, &type, 1);
-		write(fd, &target_size, 4);
-		while (target_size) {
-			int read_size = target_size;
-			if (target_size > 1024)
-				read_size = 1024;
-			if (readn(target_file, target_buf, read_size) != read_size) {
-				printf("Error while reading target file\n");
-				break;
-			}
-			target_size -= read_size;
-			int n = writen(fd, target_buf, read_size);
-			printf("write %d,%d bytes to fd\n", read_size, n);
+		switch(req_type)
+		{
+		case 6:
+			file_name = strtok(command, " ");
+			file_name = strtok(command, " ");
+			transfer_file(fd, file_name);
+			break;
+		case 2:
+			list_dir(fd);
+			break;
+		case 7:
+			help_msg(fd);
+			break;
 		}
 	}
     printf("connect lost\n");
@@ -73,7 +127,7 @@ int main(int argc, char **argv) {
 	;
 	struct sockaddr_in cliaddr, servaddr;
 	pthread_t ntid;
-	void *process_ret;
+	//void *process_ret;
 	if (argc != 2) {
 		printf("usage: tcpsrv port");
 		return 0;
@@ -109,6 +163,5 @@ int main(int argc, char **argv) {
 		break;
 
 #endif
-//        str_echo(connfd);	/* process the request */
 	}
 }
