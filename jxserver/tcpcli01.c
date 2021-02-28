@@ -54,23 +54,26 @@ int retrieve_file(int fd, char *local_saving_name)
 	char recv_buf[1024];
 	int recv_size;
     read(fd, &recv_size, 4);
+    printf("Receiving file of size %d\n", recv_size);
     FILE *new_file_fp = NULL;
     new_file_fp = fopen(local_saving_name, "w");
     if(new_file_fp == NULL){
-        perror("can't create file ");
+        perror("Can't create file\n");
         return 0;
     }
+    printf("File open successful\n");
     while(recv_size)
     {
     	int read_size = recv_size;
     	if(recv_size > 1024)
     		read_size = 1024;
-    	if(readn(fd, recv_buf, recv_size) != read_size)
+    	if(readn(fd, recv_buf, read_size) != read_size)
     	{
-    		break;
     		printf("Error while reading target file\n");
+    		break;
     	}
     	recv_size -= read_size;
+    	printf("read_size: %d\n", read_size);
     	int n = writen(fileno(new_file_fp), recv_buf, read_size);
         printf("write %d,%d bytes to file\n",read_size,n);
     }

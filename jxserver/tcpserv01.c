@@ -51,6 +51,8 @@ int list_dir(int fd)
 	struct dirent *dirp;
 	char *dirname = ".";
 	//char *dir_ret;
+	unsigned char response_req_type = 3;
+	write(fd, &response_req_type, 1);
 	if((dp = opendir(dirname)) == NULL)
 	{
 		printf("Failed to read directory\n");
@@ -63,6 +65,7 @@ int list_dir(int fd)
 		dir_size += 1;
 	}
 	closedir(dp);
+
 	return 0;
 }
 
@@ -101,15 +104,13 @@ void* process(void *arg)
 		if (n == 0 || n < 0)
 			break;
 		command[n] = 0;
-		if((int)req_type == 6)
+		switch(req_type)
 		{
+		case 6:
 			file_name = strtok(command, " ");
 			file_name = strtok(NULL, " ");
 			transfer_file(fd, file_name);
 			break;
-		}
-		switch(req_type)
-		{
 		case 2:
 			list_dir(fd);
 			break;
