@@ -49,7 +49,7 @@ int list_dir(int fd)
 	int dir_size = 0;
 	DIR *dp;
 	struct dirent *dirp;
-	char *dirname = "\\";
+	char *dirname = ".";
 	//char *dir_ret;
 	if((dp = opendir(dirname)) == NULL)
 	{
@@ -59,6 +59,7 @@ int list_dir(int fd)
 	while((dirp = readdir(dp)) != NULL)
 	{
 		dirp = readdir(dp);
+		printf("d_name : %s\n", dirp->d_name);
 		dir_size += 1;
 	}
 	closedir(dp);
@@ -100,14 +101,15 @@ void* process(void *arg)
 		if (n == 0 || n < 0)
 			break;
 		command[n] = 0;
-
-		switch(req_type)
+		if((int)req_type == 6)
 		{
-		case 6:
 			file_name = strtok(command, " ");
-			file_name = strtok(command, " ");
+			file_name = strtok(NULL, " ");
 			transfer_file(fd, file_name);
 			break;
+		}
+		switch(req_type)
+		{
 		case 2:
 			list_dir(fd);
 			break;

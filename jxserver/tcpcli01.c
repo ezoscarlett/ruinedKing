@@ -33,7 +33,7 @@ int is_begin_with(const char *str1,char *str2)
 
 int is_valid_get(char *command)
 {
-    if(is_begin_with(command, "get"))
+    if(is_begin_with(command, "get") == 1)
     {
     	if(strtok(command, " ") != NULL)
     	{
@@ -89,7 +89,8 @@ int retrieve_help(int fd)
 	read(fd, &msg_size, 4);
 	char* msg = malloc(sizeof(char) * msg_size);
 	int n = readn(fd, msg, msg_size);
-    printf("write %d,%d bytes to file\n",msg_size,n);
+    printf("read %d,%d bytes of help message\n",msg_size,n);
+    printf("%s\n", msg);
     return 0;
 }
 
@@ -119,7 +120,7 @@ int main(int argc, char **argv)
 		perror("Binding failed:");
 	}
     while(1){
-    	printf("> ");
+    	printf("> \n");
         int n_read = read(0, command, sizeof(command));
         if(n_read < 0)
         {
@@ -134,14 +135,11 @@ int main(int argc, char **argv)
         	command[command_len-1] = 0;
         if(command[0] == 'q')
             break;
-        printf("filename: %s\n", command);
-
+        char command_sent[1024];
+        strcpy(command_sent, command);
         if (is_valid_get(command) == 1)
         {
         	req_type = 6;
-        	local_saving_name = strtok(command, " ");
-        	local_saving_name = strtok(command, " ");
-        	local_saving_name = strtok(command, " ");
         }
         else if (strcmp(command, "ls") == 0)
         	req_type = 2;
@@ -153,13 +151,18 @@ int main(int argc, char **argv)
         	continue;
         }
         write(sockfd, &req_type, 1);
-        command_len = strlen(command);
+        command_len = strlen(command_sent);
         write(sockfd, &command_len, 4);
-        write(sockfd, &command, command_len);
+        write(sockfd, &command_sent, command_len);
         read(sockfd, &response_type, 1);
 
         switch((int)response_type){
         case 7:
+        	printf("Start transfer\n");
+        	local_saving_name = strtok(command_sent, " ");
+        	local_saving_name = strtok(NULL, " ");
+        	local_saving_name = strtok(NULL, " ");
+        	printf("Local name: %s\n", local_saving_name);
         	retrieve_file(sockfd, local_saving_name);
         	break;
         case 3:
