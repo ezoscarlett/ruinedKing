@@ -85,9 +85,9 @@ int retrieve_dir(int fd)
 	read(fd, &dir_total_size, 4);
 	while(dir_total_size)
 	{
-		printf("total size: %d\n", dir_total_size);
 		read(fd, &cur_dir_size, 4);
 		read(fd, &dir, cur_dir_size);
+		dir[cur_dir_size] = 0;
 		printf("%s\n", dir);
 		dir_total_size -= cur_dir_size;
 	}
@@ -184,6 +184,5 @@ int main(int argc, char **argv)
         }
     }
     close(sockfd);
-	//str_cli(stdin, sockfd);		/* do it all */
 	return 0;
 }

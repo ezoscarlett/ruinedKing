@@ -50,7 +50,6 @@ int list_dir(int fd)
 	DIR *dp;
 	struct dirent *dirp;
 	char *dirname = ".";
-	//char *dir_ret;
 	unsigned char response_req_type = 3;
 	write(fd, &response_req_type, 1);
 	if((dp = opendir(dirname)) == NULL)
@@ -63,7 +62,6 @@ int list_dir(int fd)
 		dir_total_size += strlen(dirp->d_name);
 	}
 	write(fd, &dir_total_size, 4);
-	printf("total size: %d\n", dir_total_size);
 	closedir(dp);
 	if((dp = opendir(dirname)) == NULL)
 	{
@@ -75,9 +73,6 @@ int list_dir(int fd)
 		int cur_dir_size = strlen(dirp->d_name);
 		char dir[256];
 		strncpy(dir, dirp->d_name, cur_dir_size);
-		dir[cur_dir_size] = 0;
-		printf("dir: %s\n", dir);
-
 		write(fd, &cur_dir_size, 4);
 		int n = writen(fd, dirp->d_name, cur_dir_size);
 		printf("wrote %d bytes to fd\n", n);
@@ -148,7 +143,6 @@ int main(int argc, char **argv) {
 	;
 	struct sockaddr_in cliaddr, servaddr;
 	pthread_t ntid;
-	//void *process_ret;
 	if (argc != 2) {
 		printf("usage: tcpsrv port");
 		return 0;
