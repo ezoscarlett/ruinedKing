@@ -175,7 +175,6 @@ int main(int argc, char **argv)
         	retrieve_file(sockfd, local_saving_name);
         	break;
         case 3:
-        	printf("Entered ls");
         	retrieve_dir(sockfd);
         	break;
         case 8:
