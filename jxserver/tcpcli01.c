@@ -54,14 +54,12 @@ int retrieve_file(int fd, char *local_saving_name)
 	char recv_buf[1024];
 	int recv_size;
     read(fd, &recv_size, 4);
-    printf("Receiving file of size %d\n", recv_size);
     FILE *new_file_fp = NULL;
     new_file_fp = fopen(local_saving_name, "w");
     if(new_file_fp == NULL){
         perror("Can't create file\n");
         return 0;
     }
-    printf("File open successful\n");
     while(recv_size)
     {
     	int read_size = recv_size;
@@ -73,7 +71,6 @@ int retrieve_file(int fd, char *local_saving_name)
     		break;
     	}
     	recv_size -= read_size;
-    	printf("read_size: %d\n", read_size);
     	int n = writen(fileno(new_file_fp), recv_buf, read_size);
         printf("write %d,%d bytes to file\n",read_size,n);
     }
@@ -83,6 +80,17 @@ int retrieve_file(int fd, char *local_saving_name)
 
 int retrieve_dir(int fd)
 {
+	int dir_total_size, cur_dir_size;
+	char dir[1024];
+	read(fd, &dir_total_size, 4);
+	while(dir_total_size)
+	{
+		printf("total size: %d\n", dir_total_size);
+		read(fd, &cur_dir_size, 4);
+		read(fd, &dir, cur_dir_size);
+		printf("%s\n", dir);
+		dir_total_size -= cur_dir_size;
+	}
 	return 0;
 }
 
@@ -161,14 +169,13 @@ int main(int argc, char **argv)
 
         switch((int)response_type){
         case 7:
-        	printf("Start transfer\n");
         	local_saving_name = strtok(command_sent, " ");
         	local_saving_name = strtok(NULL, " ");
         	local_saving_name = strtok(NULL, " ");
-        	printf("Local name: %s\n", local_saving_name);
         	retrieve_file(sockfd, local_saving_name);
         	break;
         case 3:
+        	printf("Entered ls");
         	retrieve_dir(sockfd);
         	break;
         case 8:

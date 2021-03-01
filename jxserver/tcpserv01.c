@@ -46,7 +46,7 @@ int transfer_file(int fd, char *file_name)
 
 int list_dir(int fd)
 {
-	int dir_size = 0;
+	int dir_total_size = 0;
 	DIR *dp;
 	struct dirent *dirp;
 	char *dirname = ".";
@@ -60,9 +60,27 @@ int list_dir(int fd)
 	}
 	while((dirp = readdir(dp)) != NULL)
 	{
-		dirp = readdir(dp);
-		printf("d_name : %s\n", dirp->d_name);
-		dir_size += 1;
+		dir_total_size += strlen(dirp->d_name);
+	}
+	write(fd, &dir_total_size, 4);
+	printf("total size: %d\n", dir_total_size);
+	closedir(dp);
+	if((dp = opendir(dirname)) == NULL)
+	{
+		printf("Failed to read directory\n");
+		return -1;
+	}
+	while((dirp = readdir(dp)) != NULL)
+	{
+		int cur_dir_size = strlen(dirp->d_name);
+		char dir[256];
+		strncpy(dir, dirp->d_name, cur_dir_size);
+		dir[cur_dir_size] = 0;
+		printf("dir: %s\n", dir);
+
+		write(fd, &cur_dir_size, 4);
+		int n = writen(fd, dirp->d_name, cur_dir_size);
+		printf("wrote %d bytes to fd\n", n);
 	}
 	closedir(dp);
 
