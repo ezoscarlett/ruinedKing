@@ -129,9 +129,11 @@ int main(int argc, char **argv)
 	if(ret < 0)
 	{
 		perror("Binding failed:");
+        exit(0);
 	}
     while(1){
-    	printf("> \n");
+    	printf(">");
+        fflush(stdout);
         int n_read = read(0, command, sizeof(command));
         if(n_read < 0)
         {
